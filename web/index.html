@@ -217,7 +217,7 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         // 更新房间玩家列表
         playerNum = data.players.length;
         players = data.players.map(player => {
-          return new Player(player.clientId, player.name, player.playerId);
+          return new Player(player.clientId, player.name, player.playerId,player.dead);
         });
         console.log(players)
         for (let i = 0; i < playerNum; i++) {

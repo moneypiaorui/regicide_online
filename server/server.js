@@ -161,7 +161,7 @@ class Room {
         }))
         this.broadcastMessage(JSON.stringify({
           type: "sysMessage",
-          message: "轮到玩家 " + this.players[it - 1].name + " 支付BOSS的攻击"
+          message: "轮到玩家 " + this.players[it - 1].name + " 攻击BOSS"
         }))
         break;
       }
@@ -389,7 +389,7 @@ wss.on('connection', ws => {
               if (rooms[roomId].piles.handPiles[playerId - 1].cardList.reduce((acc, card) => acc + card.attack, 0) < rooms[roomId].piles.Boss.cardList[0].attack) {
                 console.log("player:" + playerId + " cannot afford the attack,died");
                 // 广播死亡信息
-                rooms[roomId].players[playerId].dead = 1;
+                rooms[roomId].players[playerId-1].dead = 1;
                 rooms[roomId].broadcastMessage(JSON.stringify({
                   type: "sysMessage",
                   message: "玩家 " + name + " 因为无法支付BOSS的伤害而死亡"
@@ -424,11 +424,7 @@ wss.on('connection', ws => {
           rooms[roomId].piles.handPiles[playerId - 1].cardList = data.leftPile;
           // 支付完毕，通知下一个人攻击
           rooms[roomId].sendPilesStates();
-          rooms[roomId].broadcastMessage(JSON.stringify({
-            type: "action",
-            action: "attack",
-            playerId: ((playerId % rooms[roomId].players.length) + 1)
-          }))
+          rooms[roomId].nextAttacker(playerId);
         }
 
         // 跳过路由

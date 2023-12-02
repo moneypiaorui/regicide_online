@@ -150,10 +150,11 @@ class CardPile {
 }
 
 class Player {
-  constructor(clientId, name, playerId) {
+  constructor(clientId, name, playerId,dead) {
     this.clientId = clientId;
     this.playerId = playerId;
     this.name = name;
+    this.dead=dead;
     this.DOMlink=null;
   }
   showName(nameTag){
