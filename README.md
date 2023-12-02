@@ -20,7 +20,7 @@ PS有些规则没有实现：
 - #### ~~双人模式游戏进行时一个人退出再进入，在准备阶段会显示他的卡牌，疑似上次游戏遗留的~~
 > 已解决：将gameover函数放在sendPlayerState之前调用即可解决
 - #### 双人模式当一个人攻击后无法支付boss伤害时，双方都无法显示按钮
->已解决：`rooms[roomId].players[playerId].dead = 1;`中playerId忘记-1
+> 已解决：`rooms[roomId].players[playerId].dead = 1;`中playerId忘记-1
 - #### 双人模式游戏进行时一个人退出再进入，游戏开始后会有一直一个人出牌bug，而且出完牌后牌不会消失
 
 ## 后续功能添加

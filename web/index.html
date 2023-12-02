@@ -47,15 +47,15 @@ user-scalable=no：禁止用户手动缩放网页。 -->
     <div class="roomId">当前房间ID：</div>
     <div class="other-players">
       <div class="player1 hide">
-        <span class="player-name">1</span>
+        <span class="player-name"></span>
         <div class="cardContain" id="player1"></div>
       </div>
       <div class="player2 hide">
-        <span class="player-name">2</span>
+        <span class="player-name"></span>
         <div class="cardContain" id="player2"></div>
       </div>
       <div class="player3 hide">
-        <span class="player-name">3</span>
+        <span class="player-name"></span>
         <div class="cardContain" id="player3"></div>
       </div>
     </div>
@@ -147,6 +147,13 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       Boss.updateShow();
       bossPile.updateShow();
       Boss.cardList[0].updateInfo();
+      // players.forEach(player => {
+      //   if (player.dead == 0)
+      //     player.removeDead();
+      //   else
+      //     player.addDead();
+      //   player.removeAction();
+      // })
     }
     // 创建 WebSocket 对象并指定服务器地址
     var socket = new WebSocket('ws://localhost:8013');
@@ -213,11 +220,16 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       } else if (data.type == "gameStart") {
         // 游戏开始的逻辑
 
+      } else if (data.type == "playerDie") {
+        console.log(data.playerId)
+        if (data.playerId != playerId) {
+          players[data.playerId - 1].addDead();
+        }
       } else if (data.type == "updatePlayers") {
         // 更新房间玩家列表
         playerNum = data.players.length;
         players = data.players.map(player => {
-          return new Player(player.clientId, player.name, player.playerId,player.dead);
+          return new Player(player.clientId, player.name, player.playerId, player.dead);
         });
         console.log(players)
         for (let i = 0; i < playerNum; i++) {
@@ -253,20 +265,36 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         refresh();
       } else if (data.type == "action") {
         if (data.action == "attack") {
+          // 更新其他人正在出牌状态
+          players.forEach((player, index) => {
+              if (index + 1 != playerId) {
+                
+                console.log(index+1)    
+                if (index + 1 == data.playerId)
+                  player.addAction();
+                else
+                  player.removeAction();
+              }
+            })
           if (data.playerId == playerId) {
             // 让出牌和跳过按钮显示
             playButton.classList.remove("hide");
             skipButton.classList.remove("hide");
-          } else {
-            // 显示其他人正在出牌
           }
         } else if (data.action == "pay") {
+          // 更新其他人支付状态
+          players.forEach((player, index) => {
+              if (index + 1 != playerId) {
+                if (index + 1 == data.playerId)
+                  player.addAction();
+                else
+                  player.removeAction();
+              }
+            })
           if (data.playerId == playerId) {
             // 让支付按钮显示
             payButton.classList.remove("hide");
-          } else {
-            // 显示其他人正在支付
-          }
+          } 
         }
       } else if (data.type == "sysMessage") {
         console.log(data.message);
@@ -288,6 +316,12 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         handPiles.forEach(pile => {
           pile.push([]);
           pile.updateShow();
+        })
+        players.forEach((player,index)=>{
+          if(index+1!=playerId){
+            player.removeAction();
+            player.removeDead();
+          }
         })
         playButton.classList.add("hide");
         payButton.classList.add("hide");

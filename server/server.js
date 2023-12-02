@@ -78,7 +78,7 @@ class Room {
       drawPile: new CardPile([]),
       Boss: new CardPile([]),
     }
-    // this.playerNum = this.players.length
+    this.alivePlayerNum = this.players.length
     this.state = "gaming";
     [this.originalCards, this.cardsLimit] = [[10, 20], [7, 8], [6, 7], [5, 6], [5, 5]][this.players.length];
     for (let i = 1; i <= 4; i++) {
@@ -104,11 +104,7 @@ class Room {
     this.selectBoss();
     this.sendPilesStates();
     // 广播通知P1开始攻击
-    this.broadcastMessage(JSON.stringify({
-      type: "action",
-      action: "attack",
-      playerId: 1
-    }))
+    this.nextAttacker(0);
   }
   selectBoss() {
     if (this.piles.bossPile.cardList.length != 0) {
@@ -117,6 +113,7 @@ class Room {
     } else {
       //胜利
       this.broadcastMessage(JSON.stringify({ state: "win" }))
+      this.broadcastMessage(JSON.stringify({ state: "sys】" }))
       // alert("You win!");
       // location.reload();
     }
@@ -144,6 +141,9 @@ class Room {
   gameover(message) {
     this.state = "waiting";
     this.skipTimes = 0;
+    this.players.forEach(player => {
+      player.dead = 0;
+    })
     this.broadcastMessage(JSON.stringify({
       type: "gameover",
       message: message
@@ -261,14 +261,18 @@ wss.on('connection', ws => {
     let drawNum = 0;
     let count = 0;
     while (count < rooms[roomId].players.length) {//如果所有玩家都跳过了摸牌，摸牌结束
-      if (drawNum < value && rooms[roomId].piles.drawPile.cardList.length > 0) {
-        if (rooms[roomId].piles.handPiles[index].cardList.length < rooms[roomId].cardsLimit) {
-          rooms[roomId].piles.handPiles[index].push([rooms[roomId].piles.drawPile.cardList.pop()]);
-          drawNum++;
-          count = 0;
+      if (drawNum < value && rooms[roomId].piles.drawPile.cardList.length > 0) {//如果摸牌次数还有剩余and摸牌堆还有牌
+        if (rooms[roomId].players[index].dead == 0) {
+          if (rooms[roomId].piles.handPiles[index].cardList.length < rooms[roomId].cardsLimit) {//如果手牌没满
+            rooms[roomId].piles.handPiles[index].push([rooms[roomId].piles.drawPile.cardList.pop()]);
+            drawNum++;
+            count = 0;
+          } else {
+            count++;//跳过一个玩家，即表示一个玩家牌满了
+          }
         } else {
-          count++;//跳过一个玩家，即表示一个玩家牌满了
-        }
+          count++;//跳过一个死亡玩家
+        } 
       } else {
         break;
       }
@@ -380,6 +384,7 @@ wss.on('connection', ws => {
           console.log("player:" + name + " attack")
           console.log("Boss state:" + rooms[roomId].piles.Boss.cardList[0].life + "   " + rooms[roomId].piles.Boss.cardList[0].attack)
           attack(data.attackPile, data.leftPile);
+          rooms[roomId].skipTimes = 0;//跳过次数归零
           rooms[roomId].sendPilesStates();//广播更新牌堆
 
           //攻击后根据血量和攻击判断是否进入支付模式
@@ -389,10 +394,15 @@ wss.on('connection', ws => {
               if (rooms[roomId].piles.handPiles[playerId - 1].cardList.reduce((acc, card) => acc + card.attack, 0) < rooms[roomId].piles.Boss.cardList[0].attack) {
                 console.log("player:" + playerId + " cannot afford the attack,died");
                 // 广播死亡信息
-                rooms[roomId].players[playerId-1].dead = 1;
+                rooms[roomId].players[playerId - 1].dead = 1;
+                rooms[roomId].alivePlayerNum--;
                 rooms[roomId].broadcastMessage(JSON.stringify({
                   type: "sysMessage",
                   message: "玩家 " + name + " 因为无法支付BOSS的伤害而死亡"
+                }))
+                rooms[roomId].broadcastMessage(JSON.stringify({
+                  type: "playerDie",
+                  playerId:playerId 
                 }))
                 rooms[roomId].nextAttacker(playerId);
               } else {
@@ -430,9 +440,9 @@ wss.on('connection', ws => {
         // 跳过路由
         else if (data.command == "skip") {
           rooms[roomId].skipTimes++;
-          if (rooms[roomId].skipTimes == rooms[roomId].players.length) {
+          if (rooms[roomId].skipTimes == rooms[roomId].alivePlayerNum) {
             // 一轮中所有人都跳过，GAMEOVER
-            rooms[roomId].gameover("一轮出牌中所有人都跳过");
+            rooms[roomId].gameover("一轮出牌中所有存活玩家都跳过");
           } else {
             rooms[roomId].nextAttacker(playerId);
           }
@@ -459,7 +469,7 @@ wss.on('connection', ws => {
               rooms[roomId].setHost();
           } else if (rooms[roomId].state == "gaming") {
             // 一定要先通知GAMEOVER，再更新玩家列表，不然浏览器显示的牌堆没法全部清除
-            rooms[roomId].gameover("有玩家离开游戏");
+            rooms[roomId].gameover("玩家 "+name+" 离开游戏");
             rooms[roomId].sendPlayersState();
             if (playerId == 1)
               rooms[roomId].setHost();

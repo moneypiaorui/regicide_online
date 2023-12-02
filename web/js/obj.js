@@ -165,9 +165,15 @@ class Player {
     
   }
   addAction(){
-    document.querySelector(this.DOMlink).classList.add("player-action")
+    document.querySelector(this.DOMlink+" span").classList.add("player-action")
   }
   removeAction(){
-    document.querySelector(this.DOMlink).classList.remove("player-action")
+    document.querySelector(this.DOMlink+" span").classList.remove("player-action")
+  }
+  addDead(){
+    document.querySelector(this.DOMlink+" span").classList.add("player-dead")
+  }
+  removeDead(){
+    document.querySelector(this.DOMlink+" span").classList.remove("player-dead")
   }
 }
