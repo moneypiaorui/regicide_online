@@ -1,9 +1,39 @@
+.sysMessage{
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height:40px;
+  padding: 5px 20px;
+  float: right;
+  right:40px;
+  top:-50px;
+  background-color: rgba(25, 162, 25, 0.658);
+  /* border-radius: 5px; */
+  border-left: 3px green solid;
+  transition: 0.5s;
+  font-size: 20px;
+}
+.sysMessage-show{
+  transform: translateY(60px);
+}
+.player-action{
+  transition: 0.5s;
+  background-color: rgba(54, 228, 54, 0.863);
+}
+
+
 #game-board {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
   height: 95vh;
+}
+
+.roomId{
+  font-size: 30px;
 }
 .other-players{
   /* height: 30%; */
@@ -15,12 +45,15 @@
   border-radius: 10px;
 }
 .other-players > div {
-  width: 30%;
+  width: 25%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center; 
   font-size: 30px;
+}
+.other-players > div >span {
+  margin: 10px 0;
 }
 .other-players .cardContain{
   width: 90%;
@@ -63,6 +96,7 @@
 }
 .piles-area .pile-with-name span{
   font-size: 20px;
+  white-space: nowrap;
 }
 .piles-area .pile-with-name {
   display: flex;
@@ -72,10 +106,10 @@
   width: 10%;
 }
 .piles-area .pile-with-name:nth-child(1) {
-  width: 30%;
+  width: 25%;
 }
 .piles-area .pile-with-name:nth-child(2) {
-  width: 20%;
+  width: 15%;
 }
 .piles-area .pile-with-name .cardContain {
   width: 100%;
@@ -86,7 +120,7 @@
 
 
 .player-area {
-  width: 70%;
+  width: 80%;
   height: 30%;
   display: flex;
   flex-direction: column;
@@ -108,11 +142,13 @@
   justify-content: center;
   width: 140px;
   height: 40px;
-  font-size: 35px;
-  background-color: greenyellow;
-  border-radius: 10px;
-  margin: 30px 40px;
+  font-size: 25px;
+  background-color: rgba(36, 176, 36, 0.6);
+  border-radius: 5px;
+  border-left: green solid 5px;
+  margin: 10px 40px;
   padding: 5px 5px;
+  color: white;
 }
 
 .card {
@@ -162,7 +198,7 @@
 }
 
 .hide{
-  display: none;
+  display: none!important;
 }
 
 .link{
@@ -171,10 +207,20 @@
   position: fixed;
   justify-content:space-around ;
   align-items: center;
-  top: 0;
+  bottom: 0;
 }
 .link a{
   margin: 0 30px;
-  font-size: 30px;
+  font-size: 20px;
   
+}
+
+.leave-button{
+  position: fixed;
+  left: 10px;
+  top:10px;
+  background: url("../images/leave.png") no-repeat;
+  background-size: cover;
+  width: 50px;
+  height: 60px;
 }

@@ -150,9 +150,23 @@ class CardPile {
 }
 
 class Player {
-  constructor(clientId, name, PlayerId) {
+  constructor(clientId, name, playerId) {
     this.clientId = clientId;
-    this.PlayerId = PlayerId;
+    this.playerId = playerId;
     this.name = name;
+    this.DOMlink=null;
+  }
+  showName(nameTag){
+    if(this.DOMlink!=null){
+      document.querySelector(this.DOMlink).classList.remove("hide");
+      document.querySelector(this.DOMlink+" "+nameTag).innerText=this.name;
+    }
+    
+  }
+  addAction(){
+    document.querySelector(this.DOMlink).classList.add("player-action")
+  }
+  removeAction(){
+    document.querySelector(this.DOMlink).classList.remove("player-action")
   }
 }

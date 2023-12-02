@@ -1,0 +1,154 @@
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+.login-area {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-around; */
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin: 0 0;
+    top: 0;
+    left: 0;
+    background-color: rgb(6, 19, 37);
+    z-index: 5;
+}
+
+.rooms-show-area{
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+    width: 400px;
+    height:0;/*我真的不知道为什么加上这句就不会超出浏览器视框*/
+    flex: 1;
+    background-color: white;
+    opacity: 0.8;
+}
+
+.rooms-show-area > span{
+    color: rgb(83, 129, 223);
+    display: block;
+    font-size: 25px;
+    /* margin-top: 5px; */
+    padding: 5px 0;
+    text-align: center;
+    width: 100%;
+    border-top-right-radius: 10px;
+    border-top-left-radius:10px ;
+    background-color:rgb(198, 207, 220) ;
+}
+.room-containor{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+}
+.room-card{
+    height: 50px;
+    width: 90%;
+    margin-top: 10px!important;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-shrink: 0;
+    background-color:rgba(83, 139, 223, 0.5) ;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+.room-card span{
+    width: 30%;
+    height: 80%;
+    display: flex;
+    align-items: center;
+    justify-content:center;
+    white-space: nowrap;
+    overflow-x: hidden;
+    font-size: 20px;
+}
+.room-card span:nth-child(2){
+    border-left: rgb(63, 142, 253) 5px solid;
+    border-right: rgb(63, 142, 253) 5px solid;
+}
+
+
+#login-body {
+    width: 400px;
+    height: 380px;
+    margin: 50px auto;
+    background-color: white;
+    opacity: 0.8;
+    border-radius: 10px;
+    text-align: center;
+    padding-top: 10px;
+    position: relative;
+    
+}
+#load {
+    color: rgb(83, 129, 223);
+    display: block;
+    font-size: 40px;
+    margin-top: 10px;
+}
+
+#login-body span p {
+    display: block;
+    font-size: 15px;
+    text-align: left;
+    margin: 10px 40px;
+}
+
+#login-body span input {
+    width: 80%;
+    height: 30px;
+    border-radius: 5px;
+    background-color: rgb(198, 207, 220);
+    margin: auto;
+    border: 0px;
+}
+
+#login {
+    display: block;
+    height: 40px;
+    width: 120px;
+    background-color: rgb(51, 110, 198);
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    margin: 30px 40px;
+    border-radius: 5px;
+    border: 0px;
+    transition: 0.1s;
+}
+
+#alert {
+    display: block;
+    font-size: 20px;
+    font-family: "微软雅黑";
+    height: 40px;
+    width: 80%;
+    padding-top: 12px;
+    margin: 10px 40px;
+    /* background-color: red; */
+    border-radius: 5px;
+    opacity: 0;
+    /* transform: translateY(20px); */
+}
+
+#register {
+    background-color: grey;
+    width: 100%;
+    height: 50px;
+    font-size: 20px;
+    padding-top: 20px;
+    position: absolute;
+    bottom: 0px;
+    border-radius: 0 0 10px 10px;
+    color: white;
+}
