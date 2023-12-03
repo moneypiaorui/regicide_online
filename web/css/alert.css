@@ -1,0 +1,38 @@
+.alert-area{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: flex-start;
+    width: auto;
+    float: left;
+    left:100%;
+    top:10px;
+  }
+  .alert-card{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    height:40px;
+    padding: 0 20px;
+    margin-bottom: 10px;
+    background-color: rgba(25, 162, 25, 0.658);
+    border-left: 5px green solid;
+    transition: 0.3s;
+    font-size: 20px;
+    white-space: nowrap;
+    z-index: 100;
+  }
+  .alert-card-show{
+    transform: translateX(-110%);
+  }
+  .alert-card-hide{
+    opacity: 0;
+    transform: translateX(-110%);
+    margin-top: -50px;
+  }
+  .alert-warn{
+    background-color: rgba(255, 48, 48, 0.658);
+    border-left: 5px red solid;
+  }

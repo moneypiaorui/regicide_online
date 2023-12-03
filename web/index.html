@@ -11,6 +11,8 @@ maximum-scale=1：设置最大缩放比例为1，防止用户手动放大网页�
 user-scalable=no：禁止用户手动缩放网页。 -->
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="stylesheet" type="text/css" href="css/login.css">
+  <link rel="stylesheet" href="css/alert.css">
+  <link rel="stylesheet" href="css/chat.css">
 </head>
 
 <body>
@@ -35,7 +37,8 @@ user-scalable=no：禁止用户手动缩放网页。 -->
     </div>
   </div>
 
-  <div class="sysMessage"></div>
+  <div class="alert-area">
+  </div>
 
   <div class="leave-button" onclick="window.location.href ='index.html'"></div>
   <div class="" id="game-board">
@@ -81,21 +84,28 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       </div>
     </div>
     <div class="player-area">
+      <div class="cardContain player-active" id="handPile"></div>
       <div class="button-area">
         <div class="button hide" id="play">出牌</div>
         <div class="button hide" id="skip">跳过</div>
         <div class="button hide" id="pay">支付</div>
         <div class="button hide" id="start">开始游戏</div>
       </div>
-      <div class="cardContain player-active" id="handPile">
-
-      </div>
     </div>
   </div>
 
+  <div class="chat-area folded" >
+    <div class="chat-show-area" ></div>
+    <div class="chat-input-area">
+      <input type="text">
+      <button>发送</button>
+    </div>
+  </div>
 
+  <script src="js/alert.js"> </script>
   <script src="js/obj.js"></script>
   <script src="js/functions.js"></script>
+  <script src="js/chat.js"></script>
   <script>
     al = document.querySelector("#alert");
     showAlert1 = (message) => {
@@ -162,13 +172,6 @@ user-scalable=no：禁止用户手动缩放网页。 -->
     // 当连接建立时触发的事件
     socket.onopen = function () {
       console.log('WebSocket 连接已建立');
-      // 自动加入房间的逻辑
-      // socket.send(JSON.stringify({
-      //   state: "outRoom",
-      //   type: "joinRoom",
-      //   roomId: roomId,
-      //   name: name
-      // }));
     };
 
 
@@ -198,9 +201,9 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       } else if (data.type == "joinRoom") {
         //加入房间的返回信息
         if (data.state == "fail") {
-          alert("加入房间失败\n原因：" + data.message);
+          alert("加入房间失败 原因：" + data.message);
         } else if (data.state == "succeed") {
-          console.log("成功加入房间\n房间ID:" + roomId);
+          console.log("成功加入房间 房间ID:" + roomId);
           showAlert1("成功加入房间" + roomId);
           setTimeout(() => {
             document.querySelector(".login-area").classList.add("hide")
@@ -225,6 +228,11 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         if (data.playerId != playerId) {
           players[data.playerId - 1].addDead();
         }
+      } else if (data.type == "updatePlayerId") {
+        socket.send(JSON.stringify({
+          state: "inRoom",
+          type: "updatePlayerId"
+        }))
       } else if (data.type == "updatePlayers") {
         // 更新房间玩家列表
         playerNum = data.players.length;
@@ -267,15 +275,14 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         if (data.action == "attack") {
           // 更新其他人正在出牌状态
           players.forEach((player, index) => {
-              if (index + 1 != playerId) {
-                
-                console.log(index+1)    
-                if (index + 1 == data.playerId)
-                  player.addAction();
-                else
-                  player.removeAction();
-              }
-            })
+            if (index + 1 != playerId) {
+              if (index + 1 == data.playerId)
+                player.addAttack();
+              else
+                player.removeAttack();
+              player.removePay();
+            }
+          })
           if (data.playerId == playerId) {
             // 让出牌和跳过按钮显示
             playButton.classList.remove("hide");
@@ -284,31 +291,33 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         } else if (data.action == "pay") {
           // 更新其他人支付状态
           players.forEach((player, index) => {
-              if (index + 1 != playerId) {
-                if (index + 1 == data.playerId)
-                  player.addAction();
-                else
-                  player.removeAction();
-              }
-            })
+            if (index + 1 != playerId) {
+              if (index + 1 == data.playerId)
+                player.addPay();
+              else
+                player.removePay();
+              player.removeAttack();
+            }
+          })
           if (data.playerId == playerId) {
             // 让支付按钮显示
             payButton.classList.remove("hide");
-          } 
+          }
         }
       } else if (data.type == "sysMessage") {
         console.log(data.message);
-        let sysMessageContainor = document.querySelector(".sysMessage");
-        sysMessageContainor.innerText = data.message;
-        sysMessageContainor.classList.add("sysMessage-show");
-        setTimeout(() => {
-          sysMessageContainor.classList.remove("sysMessage-show");
-        }, 1500)
+        addAlert(data.message, 0);
+        // let sysMessageContainor = document.querySelector(".sysMessage");
+        // sysMessageContainor.innerText = data.message;
+        // sysMessageContainor.classList.add("sysMessage-show");
+        // setTimeout(() => {
+        //   sysMessageContainor.classList.remove("sysMessage-show");
+        // }, 1500)
 
       } else if (data.type == "chatMessage") {
-
+        addChatCard(data);
       } else if (data.type == "gameover") {
-        alert("GAMEOVER  because:\n" + data.message)
+        addAlert("游戏结束 因为:" + data.message, 1)
         bossPile.push([]); bossPile.updateShow();
         wastePile.push([]); wastePile.updateShow();
         drawPile.push([]); drawPile.updateShow();
@@ -317,16 +326,17 @@ user-scalable=no：禁止用户手动缩放网页。 -->
           pile.push([]);
           pile.updateShow();
         })
-        players.forEach((player,index)=>{
-          if(index+1!=playerId){
-            player.removeAction();
+        players.forEach((player, index) => {
+          if (index + 1 != playerId) {
+            player.removeAttack();
+            player.removePay();
             player.removeDead();
           }
         })
         playButton.classList.add("hide");
         payButton.classList.add("hide");
         skipButton.classList.add("hide");
-        // startButton.classList.add("hide");
+        startButton.classList.add("hide");
       }
     };
 
@@ -371,7 +381,7 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         playButton.classList.add("hide");
         skipButton.classList.add("hide");
       } else {
-        alert("不允许");
+        addAlert("不允许", 1);
         handPiles[playerId - 1].cardList.forEach(card => {
           if (card.selected) card.select();
         });
@@ -382,9 +392,8 @@ user-scalable=no：禁止用户手动缩放网页。 -->
     pay = () => {
       let selectPile = handPiles[playerId - 1].cardList.filter(card => card.selected == 1)
       let sum = (selectPile.reduce((accumulator, card) => accumulator + card.attack, 0))
-      // alert(sum);
       if (sum < Boss.cardList[0].attack) {
-        alert("Not enough to defend the attack");
+        addAlert("总点数不够支付BOSS攻击", 1);
       } else {
         // 支付合法向服务器发送指令
         socket.send(JSON.stringify({

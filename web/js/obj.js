@@ -164,11 +164,17 @@ class Player {
     }
     
   }
-  addAction(){
-    document.querySelector(this.DOMlink+" span").classList.add("player-action")
+  addAttack(){
+    document.querySelector(this.DOMlink+" span").classList.add("player-attack")
   }
-  removeAction(){
-    document.querySelector(this.DOMlink+" span").classList.remove("player-action")
+  removeAttack(){
+    document.querySelector(this.DOMlink+" span").classList.remove("player-attack")
+  }
+  addPay(){
+    document.querySelector(this.DOMlink+" span").classList.add("player-pay")
+  }
+  removePay(){
+    document.querySelector(this.DOMlink+" span").classList.remove("player-pay")
   }
   addDead(){
     document.querySelector(this.DOMlink+" span").classList.add("player-dead")
