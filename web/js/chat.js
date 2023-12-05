@@ -5,9 +5,10 @@ function addChatCard(data) {
     let card = document.createElement("div")
     card.classList.add("chat-show-card");
     if (data.isSys == 0) {
-        card.innerHTML = "<strong>"+data.name + " : </strong>" + data.message;
-    }else{
-        card.innerHTML = "<strong>System :</strong> "  + data.message;
+        card.innerHTML = "<strong>" + data.name + " : </strong>" + data.message;
+        card.classList.add("p" + data.playerId);
+    } else {
+        card.innerHTML = "<strong>System :</strong> " + data.message;
         card.classList.add("sys-chat");
     }
     chatCardContainor.appendChild(card);
@@ -15,21 +16,25 @@ function addChatCard(data) {
 }
 
 document.querySelector(".chat-input-area button").addEventListener("click", () => {
-    socket.send(JSON.stringify({
-        state: "inRoom",
-        type: "chatMessage",
-        message: chatInput.value
-    }))
-    chatInput.value = "";
-});
-chatInput.addEventListener("keydown",event=>{
-    if(event.keyCode ==13){
+    if (chatInput.value != "") {
         socket.send(JSON.stringify({
             state: "inRoom",
             type: "chatMessage",
             message: chatInput.value
         }))
         chatInput.value = "";
+    }
+});
+chatInput.addEventListener("keydown", event => {
+    if (event.keyCode == 13) {
+        if (chatInput.value != "") {
+            socket.send(JSON.stringify({
+                state: "inRoom",
+                type: "chatMessage",
+                message: chatInput.value
+            }))
+            chatInput.value = "";
+        }
     }
 })
 chatCardContainor.addEventListener("click", () => {

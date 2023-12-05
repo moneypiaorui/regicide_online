@@ -380,7 +380,7 @@ wss.on('connection', ws => {
       else if (data.type === 'chatMessage') {
         // 处理聊天信息and系统信息
         const message = data.message;
-        rooms[roomId].broadcastMessage(JSON.stringify({ type: 'chatMessage', message, name: name, isSys: 0 }));
+        rooms[roomId].broadcastMessage(JSON.stringify({ type: 'chatMessage', message,playerId:playerId, name: name, isSys: 0 }));
       }
       if (rooms[roomId].state == "waiting") {//房间处于等待状态
         if (data.type == "startGame") {//开始游戏 的路由

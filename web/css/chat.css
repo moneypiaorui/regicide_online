@@ -34,6 +34,21 @@
     padding-left: 5px;
     color: white;
 }
+.chat-show-card.p1{
+    border-left: 5px solid rgb(62, 255, 62);
+}
+.chat-show-card.p2{
+    border-left: 5px solid yellow;
+}
+.chat-show-card.p3{
+    border-left: 5px solid purple;
+}
+.chat-show-card.p4{
+    border-left: 5px solid blue;
+}
+.chat-show-card.sys-chat{
+    border-left: 10px solid red;
+}
 
 .chat-input-area {
     width: 100%;
@@ -55,6 +70,3 @@
     flex: 1;
 }
 
-.sys-chat{
-    border-left: 5px solid red;
-}
