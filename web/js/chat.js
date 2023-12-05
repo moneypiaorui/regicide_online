@@ -5,7 +5,10 @@ function addChatCard(data) {
     let card = document.createElement("div")
     card.classList.add("chat-show-card");
     if (data.isSys == 0) {
-        card.innerText = data.name + ":" + data.message;
+        card.innerHTML = "<strong>"+data.name + " : </strong>" + data.message;
+    }else{
+        card.innerHTML = "<strong>System :</strong> "  + data.message;
+        card.classList.add("sys-chat");
     }
     chatCardContainor.appendChild(card);
     chatCardContainor.scrollTop = chatCardContainor.scrollHeight;//滚轮自动滑到底部

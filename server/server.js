@@ -112,10 +112,7 @@ class Room {
       this.piles.Boss.push([this.piles.bossPile.cardList.pop()]);
     } else {
       //胜利
-      this.broadcastMessage(JSON.stringify({ state: "win" }))
-      this.broadcastMessage(JSON.stringify({ state: "sys】" }))
-      // alert("You win!");
-      // location.reload();
+      this.broadcastMessage(JSON.stringify({ type: "win" }))
     }
   }
   broadcastMessage(message) {
@@ -137,6 +134,7 @@ class Room {
   }
   setHost() {
     this.broadcastMessage(JSON.stringify({ type: "setHost" }));
+    this.broadcastMessage(JSON.stringify({ type: "chatMessage", isSys: 1, message: "现在 " + this.players[0].name + " 是房主" }));
   }
   gameover(message) {
     this.state = "waiting";
@@ -148,7 +146,6 @@ class Room {
       type: "gameover",
       message: message
     }))
-    this.setHost();
   }
   updatePlayerId() {//先广播每个player，让他们再回传"updatePlayerId"信息，更新server的每个玩家的playerId
     this.broadcastMessage(JSON.stringify({
@@ -165,14 +162,15 @@ class Room {
           playerId: it
         }))
         this.broadcastMessage(JSON.stringify({
-          type: "sysMessage",
-          message: "轮到玩家 " + this.players[it - 1].name + " 攻击BOSS"
+          type: " ",
+          message: "轮到 " + this.players[it - 1].name + " 攻击BOSS"
         }))
         break;
       }
       if (it == playerId) {
         //所有人都死亡，游戏结束
         this.gameover("所有人都死亡");
+        this.setHost();
         break;
       }
       it = it % this.players.length + 1;
@@ -337,13 +335,14 @@ wss.on('connection', ws => {
         if (rooms[roomId]) {
           if (rooms[roomId].state == "waiting") {
             if (rooms[roomId].players.length <= 3) {
-              rooms[roomId].broadcastMessage(JSON.stringify({ type: 'sysMessage', message: "玩家" + name + "加入了房间" }))//广播系统通知
+              rooms[roomId].broadcastMessage(JSON.stringify({ type: 'sysMessage', message: name + "加入了房间" }))//广播系统通知
               rooms[roomId].players.push(new Player(ws, clientId, name));
               playerId = rooms[roomId].players.length;
               // 广播更新玩家列表
               console.log(clientId + " join room " + roomId)
               rooms[roomId].sendPlayersState();
               clearInterval(interval);//加入房间停止更新房间信息
+              ws.send(JSON.stringify({ type: "chatMessage", isSys: 1, message: "现在 " + rooms[roomId].players[0].name + " 是房主" }));
               ws.send(JSON.stringify({ type: 'joinRoom', state: "succeed", message: "房间加入成功" }));
             } else {
               roomId = null;
@@ -381,7 +380,7 @@ wss.on('connection', ws => {
       else if (data.type === 'chatMessage') {
         // 处理聊天信息and系统信息
         const message = data.message;
-        rooms[roomId].broadcastMessage(JSON.stringify({ type: 'chatMessage', message ,name:name,isSys:0}));
+        rooms[roomId].broadcastMessage(JSON.stringify({ type: 'chatMessage', message, name: name, isSys: 0 }));
       }
       if (rooms[roomId].state == "waiting") {//房间处于等待状态
         if (data.type == "startGame") {//开始游戏 的路由
@@ -390,10 +389,19 @@ wss.on('connection', ws => {
             type: "gameStart",
 
           }));
+          rooms[roomId].broadcastMessage(JSON.stringify({
+            type: "sysMessage",
+            message: "游戏开始"
+          }));
+          rooms[roomId].broadcastMessage(JSON.stringify({
+            type: "chatMessage",
+            isSys: 1,
+            message: "游戏开始"
+          }));
           rooms[roomId].runGame();
           console.log("room:" + roomId + ",game started")//控制台打印
         }
-      } else if (rooms[roomId].state == "gaming") {//游戏中的路由s
+      } else if (rooms[roomId].state == "gaming") {//游戏中的路由
 
         //攻击和支付处理
         if (data.command == "attack") {
@@ -404,8 +412,14 @@ wss.on('connection', ws => {
           rooms[roomId].sendPilesStates();//广播更新牌堆
           rooms[roomId].broadcastMessage(JSON.stringify({
             type: "sysMessage",
-            message: "玩家 " + name + " 攻击BOSS：" + data.attackPile.map(card => (["♠️", "♥️", "♣️", "♦️"][card.suit - 1] + ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"][card.value - 1])).join(" ")
-          }));//广播更新牌堆
+            message: name + " 攻击BOSS：" + data.attackPile.map(card => (["♠️", "♥️", "♣️", "♦️"][card.suit - 1] + ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"][card.value - 1])).join(" ")
+          }));
+          rooms[roomId].broadcastMessage(JSON.stringify({
+            type: "chatMessage",
+            isSys: 1,
+            message: name + " 攻击BOSS：" + data.attackPile.map(card => (["♠️", "♥️", "♣️", "♦️"][card.suit - 1] + ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"][card.value - 1])).join(" ")
+          }));
+          //广播更新牌堆
           setTimeout(() => {
             //攻击后根据血量和攻击判断是否进入支付模式
             if (rooms[roomId].piles.Boss.cardList[0].life > 0) {
@@ -418,7 +432,12 @@ wss.on('connection', ws => {
                   rooms[roomId].alivePlayerNum--;
                   rooms[roomId].broadcastMessage(JSON.stringify({
                     type: "sysMessage",
-                    message: "玩家 " + name + " 无法支付而死亡"
+                    message: name + " 无法支付而死亡"
+                  }))
+                  rooms[roomId].broadcastMessage(JSON.stringify({
+                    type: "chatMessage",
+                    isSys: 1,
+                    message: name + " 无法支付而死亡"
                   }))
                   rooms[roomId].broadcastMessage(JSON.stringify({
                     type: "playerDie",
@@ -434,7 +453,7 @@ wss.on('connection', ws => {
                   }))
                   rooms[roomId].broadcastMessage(JSON.stringify({
                     type: "sysMessage",
-                    message: "轮到玩家 " + name + " 支付BOSS的攻击"
+                    message: "轮到 " + name + " 支付BOSS的攻击"
                   }))
                 }
               } else {
@@ -442,24 +461,22 @@ wss.on('connection', ws => {
                 rooms[roomId].nextAttacker(playerId);
               }
             } else {//如果死了，换一个boss，并广播下一个人继续攻击
+              let dieMessage = "Boss" + (["♠️", "♥️", "♣️", "♦️"][rooms[roomId].piles.Boss.cardList[0].suit - 1] + ["J", "Q", "K"][rooms[roomId].piles.Boss.cardList[0].value - 11]) + "死亡 ";
+              //广播更新牌堆
+              rooms[roomId].selectBoss();
               rooms[roomId].broadcastMessage(JSON.stringify({
                 type: "sysMessage",
-                message: "Boss" + (["♠️", "♥️", "♣️", "♦️"][rooms[roomId].piles.Boss.cardList[0].suit - 1] + ["J", "Q", "K"][rooms[roomId].piles.Boss.cardList[0].value - 11]) + "死亡"
+                message: dieMessage + (["♠️", "♥️", "♣️", "♦️"][rooms[roomId].piles.Boss.cardList[0].suit - 1] + ["J", "Q", "K"][rooms[roomId].piles.Boss.cardList[0].value - 11]) + "加入战斗"
               }));//广播更新牌堆
-
+              rooms[roomId].broadcastMessage(JSON.stringify({
+                type: "chatMessage",
+                isSys: 1,
+                message: dieMessage + (["♠️", "♥️", "♣️", "♦️"][rooms[roomId].piles.Boss.cardList[0].suit - 1] + ["J", "Q", "K"][rooms[roomId].piles.Boss.cardList[0].value - 11]) + "加入战斗"
+              }));//广播更新牌堆
+              rooms[roomId].sendPilesStates();
               setTimeout(() => {
-                rooms[roomId].selectBoss();
-                rooms[roomId].broadcastMessage(JSON.stringify({
-                  type: "sysMessage",
-                  message: "Boss" + (["♠️", "♥️", "♣️", "♦️"][rooms[roomId].piles.Boss.cardList[0].suit - 1] + ["J", "Q", "K"][rooms[roomId].piles.Boss.cardList[0].value - 11]) + "加入战斗"
-                }));//广播更新牌堆
-                rooms[roomId].sendPilesStates();
-                setTimeout(() => {
-                  rooms[roomId].nextAttacker(playerId);
-                }, 200)
-
+                rooms[roomId].nextAttacker(playerId);
               }, 200)
-
             }
           }, 300)
         }
@@ -468,7 +485,12 @@ wss.on('connection', ws => {
           console.log("player:" + name + " pay")
           rooms[roomId].broadcastMessage(JSON.stringify({
             type: "sysMessage",
-            message: "玩家 " + name + " 支付：" + data.payPile.map(card => (["♠️", "♥️", "♣️", "♦️"][card.suit - 1] + ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"][card.value - 1])).join(" ")
+            message: name + " 支付：" + data.payPile.map(card => (["♠️", "♥️", "♣️", "♦️"][card.suit - 1] + ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"][card.value - 1])).join(" ")
+          }));
+          rooms[roomId].broadcastMessage(JSON.stringify({
+            type: "chatMessage",
+            isSys: 1,
+            message: name + " 支付：" + data.payPile.map(card => (["♠️", "♥️", "♣️", "♦️"][card.suit - 1] + ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"][card.value - 1])).join(" ")
           }));
           rooms[roomId].piles.wastePile.push(data.payPile);
           rooms[roomId].piles.handPiles[playerId - 1].cardList = data.leftPile;
@@ -485,10 +507,16 @@ wss.on('connection', ws => {
           if (rooms[roomId].skipTimes == rooms[roomId].alivePlayerNum) {
             // 一轮中所有人都跳过，GAMEOVER
             rooms[roomId].gameover("存活玩家都跳过");
+            rooms[roomId].setHost();
           } else {
             rooms[roomId].broadcastMessage(JSON.stringify({
               type: "sysMessage",
-              message: "玩家 " + name + " 跳过"
+              message: name + " 跳过"
+            }));
+            rooms[roomId].broadcastMessage(JSON.stringify({
+              type: "chatMessage",
+              isSys: 1,
+              message: name + " 跳过"
             }));
             setTimeout(() => {
               rooms[roomId].nextAttacker(playerId);
@@ -520,10 +548,9 @@ wss.on('connection', ws => {
               rooms[roomId].setHost();
           } else if (rooms[roomId].state == "gaming") {
             // 一定要先通知GAMEOVER，再更新玩家列表，不然浏览器显示的牌堆没法全部清除
-            rooms[roomId].gameover("玩家 " + name + " 离开游戏");
+            rooms[roomId].gameover(name + " 离开游戏");
             rooms[roomId].sendPlayersState();
-            if (playerId == 1)
-              rooms[roomId].setHost();
+            rooms[roomId].setHost();
           }
         }
       }

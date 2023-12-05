@@ -13,6 +13,38 @@ user-scalable=no：禁止用户手动缩放网页。 -->
   <link rel="stylesheet" type="text/css" href="css/login.css">
   <link rel="stylesheet" href="css/alert.css">
   <link rel="stylesheet" href="css/chat.css">
+  <style>
+    canvas {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.8;
+    }
+
+    .win-show-area {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      text-align: center;
+      padding-top: 200px;
+      /* z-index:10 ; */
+      /* display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; */
+    }
+
+    .win-show-area>span {
+      line-height: 100px;
+      color: white;
+      font-size: 50px;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 
 <body>
@@ -40,12 +72,13 @@ user-scalable=no：禁止用户手动缩放网页。 -->
   <div class="alert-area">
   </div>
 
+
   <div class="leave-button" onclick="window.location.href ='index.html'"></div>
   <div class="" id="game-board">
     <div class="link">
       <a href="http://47.96.132.249/index.php/2023/11/26/%e5%bc%91%e5%90%9b%e8%80%85%e6%89%91%e5%85%8b%e6%a1%8c%e6%b8%b8%e8%a7%84%e5%88%99/"
         target="_blank">弑君者桌游规则</a>
-      <a href="https://github.com/moneypiaorui/regicide_online" target="_blank">BUG反馈点这里(Github)</a>
+      <a href="https://github.com/moneypiaorui/regicide_online" target="_blank">BUG反馈(Github)</a>
     </div>
     <div class="roomId">当前房间ID：</div>
     <div class="other-players">
@@ -93,9 +126,15 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       </div>
     </div>
   </div>
+  <!-- 胜利展示区域 -->
+  <canvas class="hide" id="canvas"></canvas>
+  <div class="win-show-area hide">
 
-  <div class="chat-area folded" >
-    <div class="chat-show-area" ></div>
+    <span id="typed"></span>
+  </div>
+  <!-- 聊天区域 -->
+  <div class="chat-area folded">
+    <div class="chat-show-area"></div>
     <div class="chat-input-area">
       <input type="text">
       <button>发送</button>
@@ -106,28 +145,11 @@ user-scalable=no：禁止用户手动缩放网页。 -->
   <script src="js/obj.js"></script>
   <script src="js/functions.js"></script>
   <script src="js/chat.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/fireworks.js"></script>
+  <script src="js/typed.js"></script>
   <script>
-    al = document.querySelector("#alert");
-    showAlert1 = (message) => {
-      al.innerText = message;
-      al.style.transition = "0s";
-      al.style.backgroundColor = "rgba(0, 128, 0,0.4)";
-      al.style.color = "green";
-      al.style.transform = "translateY(20px)";
-      setTimeout(() => {
-        al.style.transition = "0.2s";
-        al.style.opacity = 1
-        al.style.transform = "translateY(0px)";
-      }, 1)
-
-      setTimeout(() => {
-        al.style.opacity = 0;
-        al.style.transform = "translateY(-20px)";
-      }, 600)
-    }
-  </script>
-  <script>
-    // document.getElementById("game-board").style.display="none";
+    fireworks();
     playerNum = 0;
     name = null;
     roomId = null
@@ -140,11 +162,12 @@ user-scalable=no：禁止用户手动缩放网页。 -->
     skipButton = document.getElementById("skip");
     startButton = document.getElementById("start");
     joinRoomButton = document.getElementById("login");
+    leaveButton=document.querySelector(".leave-button")
 
     handPiles = [];
     bossPile = new CardPile([], "bossPile", 0, 0);
     wastePile = new CardPile([], "wastePile", 1, 1);
-    drawPile = new CardPile([], "drawPile", 1, 1);
+    drawPile = new CardPile([], "drawPile", 0, 1);
     Boss = new CardPile([], "boss-showArea", 1, 1);
 
     function refresh() {
@@ -201,7 +224,8 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       } else if (data.type == "joinRoom") {
         //加入房间的返回信息
         if (data.state == "fail") {
-          alert("加入房间失败 原因：" + data.message);
+          console.log("加入房间失败 原因：" + data.message);
+          showAlert2(data.message);
         } else if (data.state == "succeed") {
           console.log("成功加入房间 房间ID:" + roomId);
           showAlert1("成功加入房间" + roomId);
@@ -209,7 +233,6 @@ user-scalable=no：禁止用户手动缩放网页。 -->
             document.querySelector(".login-area").classList.add("hide")
           }, 800)
           document.querySelector(".roomId").innerHTML = "当前房间ID:" + roomId;
-
         }
       } else if (data.type == "setHost") {
         // 设置房主
@@ -222,7 +245,26 @@ user-scalable=no：禁止用户手动缩放网页。 -->
 
       } else if (data.type == "gameStart") {
         // 游戏开始的逻辑
+        leaveButton.classList.add("hide");
 
+      } else if (data.type == "win") {
+        alert("游戏胜利");
+        leaveButton.classList.remove("hide");
+
+        document.querySelector(".win-show-area").classList.remove("hide");
+        document.querySelector("#canvas").classList.remove("hide");
+        const typed = new Typed('#typed', {
+          strings: [
+            'YOU WIN ^500',
+            `勇者 ${players.map(player => player.name).join(" ")} \n 打倒了城堡里的所有贵族, \n 拯救出了公主 ^1000`,
+            "点击左上角按钮退出房间 \n 或者直接刷新页面 \n (诚挚的邀请勇者来我的github star一下)\nQAQ ^1000"
+          ],
+          typeSpeed: 100, // 打印速度
+          startDelay: 300, // 开始之前的延迟300毫秒
+          loop: false, // 是否循环
+        });
+
+        // window.location.href = "index.html"
       } else if (data.type == "playerDie") {
         console.log(data.playerId)
         if (data.playerId != playerId) {
@@ -250,7 +292,7 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         handPiles[playerId - 1] = new CardPile([], "handPile", 1, 0);
         handPiles[playerId - 1].clickAllow = 1;
         for (let i = playerId, tem = 1; tem < playerNum; i++) {
-          handPiles[i % playerNum] = new CardPile([], "player" + (tem++), 1, 0)
+          handPiles[i % playerNum] = new CardPile([], "player" + (tem++), 0, 0)
           players[i % playerNum].DOMlink = (".player" + (tem - 1))
         }
         for (let i = 1; i <= 3; i++) {
@@ -337,6 +379,7 @@ user-scalable=no：禁止用户手动缩放网页。 -->
         payButton.classList.add("hide");
         skipButton.classList.add("hide");
         startButton.classList.add("hide");
+        leaveButton.classList.remove("hide");
       }
     };
 
@@ -428,12 +471,23 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       }, 100)
       roomId = document.querySelector("#roomname input").value;
       name = document.querySelector("#username input").value;
-      socket.send(JSON.stringify({
-        state: "outRoom",
-        type: "joinRoom",
-        roomId: roomId,
-        name: name
-      }));
+      if (roomId == "") {
+        showAlert2("房间号不能为空");
+      } else if (roomId.length > 6) {
+        showAlert2("房间号不能超过6个字符");
+      } else if (name == "") {
+        showAlert2("名字不能为空");
+      } else if (name.length > 8) {
+        showAlert2("名字不能超过8个字符");
+      } else {
+        socket.send(JSON.stringify({
+          state: "outRoom",
+          type: "joinRoom",
+          roomId: roomId,
+          name: name
+        }));
+      }
+
     })
 
 

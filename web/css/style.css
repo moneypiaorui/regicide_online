@@ -199,7 +199,7 @@
   position: fixed;
   justify-content:space-around ;
   align-items: center;
-  bottom: 0;
+  top: 0;
 }
 .link a{
   margin: 0 30px;
