@@ -4,7 +4,8 @@
 <head>
   <title>弑君者游戏</title>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=600px, minimum-scale=0.6, maximum-scale=2, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9">
+  <!-- <meta name="viewport" content="width=600px, minimum-scale=0.6, maximum-scale=2, user-scalable=yes"> -->
   <!-- width=device-width：将视口的宽度设置为设备的宽度，确保网页在移动设备上以设备宽度的大小进行显示。
 initial-scale=1：设置初始缩放比例为1，确保网页不会被自动缩小。
 maximum-scale=1：设置最大缩放比例为1，防止用户手动放大网页。
@@ -30,7 +31,7 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       top: 0;
       left: 0;
       text-align: center;
-      padding-top: 200px;
+      padding-top: 100px;
       /* z-index:10 ; */
       /* display: flex;
       flex-direction: column;
@@ -349,12 +350,6 @@ user-scalable=no：禁止用户手动缩放网页。 -->
       } else if (data.type == "sysMessage") {
         console.log(data.message);
         addAlert(data.message, 0);
-        // let sysMessageContainor = document.querySelector(".sysMessage");
-        // sysMessageContainor.innerText = data.message;
-        // sysMessageContainor.classList.add("sysMessage-show");
-        // setTimeout(() => {
-        //   sysMessageContainor.classList.remove("sysMessage-show");
-        // }, 1500)
 
       } else if (data.type == "chatMessage") {
         addChatCard(data);

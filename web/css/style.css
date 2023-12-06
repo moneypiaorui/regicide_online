@@ -1,3 +1,33 @@
+/* 电脑屏幕样式 */
+@media screen and (min-width: 1024px) {
+
+  .card {
+    width: 105px;
+    height: 150px;
+    margin-left: -50px;
+  }
+
+  .cardContain {
+    height: 150px;
+    padding-left: 50px;
+  }
+}
+
+/* 手机屏幕样式 */
+@media screen and (max-width: 767px) {
+
+  .card {
+    width: 84px;
+    height: 120px;
+    margin-left: -30px;
+  }
+
+  .cardContain {
+    height: 120px;
+    padding-left: 30px;
+  }
+
+}
 
 #game-board {
   display: flex;
@@ -7,10 +37,11 @@
   height: 95vh;
 }
 
-.roomId{
+.roomId {
   font-size: 30px;
 }
-.other-players{
+
+.other-players {
   /* height: 30%; */
   width: 90%;
   display: flex;
@@ -19,15 +50,17 @@
   border: solid black 1px;
   border-radius: 10px;
 }
-.other-players > div {
+
+.other-players>div {
   width: 25%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  align-items: center; 
+  align-items: center;
   font-size: 30px;
 }
-.other-players > div >span {
+
+.other-players>div>span {
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -35,21 +68,26 @@
   border-radius: 10px;
   margin: 10px 0;
 }
-.other-players .cardContain{
+
+.other-players .cardContain {
   width: 90%;
 }
-.other-players .player-name{
+
+.other-players .player-name {
   text-align: center;
 }
-.player-attack{
+
+.player-attack {
   transition: 0.5s;
   background-color: rgba(54, 228, 54, 0.863);
 }
-.player-pay{
+
+.player-pay {
   transition: 0.5s;
   background-color: rgba(54, 211, 228, 0.863);
 }
-.player-dead{
+
+.player-dead {
   transition: 0.5s;
   background-color: rgba(228, 54, 54, 0.863);
 }
@@ -67,7 +105,7 @@
   border-radius: 10px;
 }
 
-.attribute{
+.attribute {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -75,7 +113,8 @@
   height: 150px;
   font-size: 30px;
 }
-.attribute span{
+
+.attribute span {
   margin: 10px 30px 0px 30px;
 }
 
@@ -88,10 +127,12 @@
   border-radius: 10px;
   width: 100%;
 }
-.piles-area .pile-with-name span{
+
+.piles-area .pile-with-name span {
   font-size: 20px;
   white-space: nowrap;
 }
+
 .piles-area .pile-with-name {
   display: flex;
   flex-direction: column;
@@ -99,12 +140,15 @@
   justify-content: space-around;
   width: 10%;
 }
+
 .piles-area .pile-with-name:nth-child(1) {
   width: 25%;
 }
+
 .piles-area .pile-with-name:nth-child(2) {
   width: 15%;
 }
+
 .piles-area .pile-with-name .cardContain {
   width: 100%;
 }
@@ -146,8 +190,6 @@
 }
 
 .card {
-  width: 105px;
-  height: 150px;
   background-size: cover;
   background-position: left;
   background-clip: padding-box;
@@ -157,9 +199,9 @@
   border-top-left-radius: 5px; */
   border-radius: 5px;
   transition: 200ms;
-  overflow:visible;
+  overflow: visible;
   position: relative;
-  margin-left: -50px;
+
   /* flex-shrink:0; */
 }
 
@@ -177,8 +219,7 @@
   align-items: center;
   border: solid black 1px;
   border-radius: 10px;
-  height: 150px;
-  padding-left: 50px;
+  
 }
 
 
@@ -189,28 +230,29 @@
   top: 0; */
 }
 
-.hide{
-  display: none!important;
+.hide {
+  display: none !important;
 }
 
-.link{
+.link {
   /* width: 95%; */
   display: flex;
   position: fixed;
-  justify-content:space-around ;
+  justify-content: space-around;
   align-items: center;
   top: 0;
 }
-.link a{
+
+.link a {
   margin: 0 30px;
   font-size: 20px;
-  
+
 }
 
-.leave-button{
+.leave-button {
   position: fixed;
   left: 10px;
-  top:10px;
+  top: 10px;
   background: url("../images/leave.png") no-repeat;
   background-size: cover;
   width: 50px;
