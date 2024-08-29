@@ -1,4 +1,5 @@
 # 弑君者联机版
+[demo](http://chainpray.top:8010/game/regicide_online/index.html)
 ## 开始
 - 服务端用nodejs写的，安装好nodejs后进入server文件夹，在终端输入node server.js启动服务端
 - 然后web文件夹打开index.html即可游玩
@@ -9,7 +10,7 @@
 - 游戏过程中如果玩家离开，游戏会强制结束，房间回到wait状态
 - 游戏过程中如果一轮攻击中所有玩家都跳过or所有玩家都死亡，游戏结束，房间回到wait状态
 ## 规则介绍
-详情见[我的博客](http://47.96.132.249/index.php/2023/11/26/%e5%bc%91%e5%90%9b%e8%80%85%e6%89%91%e5%85%8b%e6%a1%8c%e6%b8%b8%e8%a7%84%e5%88%99/)
+详情见[我的博客](http://chainpray.top/index.php/2023/11/26/%E5%BC%91%E5%90%9B%E8%80%85%E6%89%91%E5%85%8B%E6%A1%8C%E6%B8%B8%E8%A7%84%E5%88%99/)
 
 PS有些规则没有实现：
 - 单人模式
